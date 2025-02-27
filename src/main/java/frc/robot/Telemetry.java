@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -14,6 +15,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,6 +34,27 @@ public class Telemetry {
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
         SignalLogger.start();
+
+        SmartDashboard.putData("Swerve Drive", new Sendable() {
+            @Override
+            public void initSendable(SendableBuilder builder){
+                builder.setSmartDashboardType("SwerveDrive");
+    
+                builder.addDoubleProperty("Front Left Angle", () -> m_moduleStatesArray[0], null);
+                builder.addDoubleProperty("Front Left Velocity", () -> m_moduleStatesArray[1], null);
+    
+                builder.addDoubleProperty("Front Right Angle", () -> m_moduleStatesArray[2], null);
+                builder.addDoubleProperty("Front Right Velocity", () -> m_moduleStatesArray[3], null);
+    
+                builder.addDoubleProperty("Back Left Angle", () -> m_moduleStatesArray[4], null);
+                builder.addDoubleProperty("Back Left Velocity", () -> m_moduleStatesArray[5], null);
+    
+                builder.addDoubleProperty("Back Right Angle", () -> m_moduleStatesArray[6], null);
+                builder.addDoubleProperty("Back Right Velocity", () -> m_moduleStatesArray[7], null);
+    
+                builder.addDoubleProperty("Robot Angle", () -> Units.degreesToRadians(m_poseArray[2]), null);
+            }
+            });
     }
 
     /* What to publish over networktables for telemetry */

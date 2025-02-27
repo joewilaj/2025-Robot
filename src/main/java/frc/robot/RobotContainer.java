@@ -15,9 +15,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.commands.RunArm;
+import frc.robot.commands.RunElevator;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
@@ -50,9 +50,16 @@ public class RobotContainer {
     //Smartdashboard choosers/data
     SendableChooser<Command> m_autoChooser = new SendableChooser<>();
 
+    public static Arm m_arm = new Arm();
+    public static Elevator m_elevator = new Elevator();
+
 
     public RobotContainer() {
         configureBindings();
+
+        //Set Default Commands
+        //m_arm.setDefaultCommand(new RunArm());
+        //m_elevator.setDefaultCommand(new RunElevator());
     }
 
     private void configureBindings() {
