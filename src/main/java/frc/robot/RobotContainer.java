@@ -102,6 +102,11 @@ public class RobotContainer {
 
         //Co-Pilot Controls (XBOX)
 
+        //Elevator
+        xbox.a().whileTrue(new RunElevator(m_elevator, .5));
+        xbox.b().whileTrue(new RunElevator(m_elevator, -.5));
+        xbox.x().whileTrue(new RunElevator(m_elevator, 0));
+
 
     }
 

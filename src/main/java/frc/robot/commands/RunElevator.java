@@ -4,30 +4,47 @@
 
 package frc.robot.commands;
 
+import frc.robot.subsystems.Elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+/** An example command that uses an example subsystem. */
+
 public class RunElevator extends Command {
-  /** Creates a new RunElevator. */
-  public RunElevator() {
-    // Use addRequirements() here to declare subsystem dependencies.
+  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
+
+  private final Elevator elevator;
+  private final double speed;
+
+  /**
+   * Creates a new ExampleCommand.
+   *
+   * @param subsystem The subsystem used by this command.
+   */
+  public RunElevator(Elevator elevator,double speed) {
+    this.elevator = elevator;
+    this.speed = speed;
+    addRequirements(elevator);
   }
+
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {}
 
-  // Called every time the scheduler runs while the command is scheduled.
+
+
+    // Called every time the scheduler runs while the command is scheduled.
+
   @Override
-  public void execute() {}
+    public void execute() {
+        elevator.setElevatorSpeed(speed);
+    }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
+  public void end(boolean interrupted) {
+    elevator.stopElevator();
   }
+
+
 }
