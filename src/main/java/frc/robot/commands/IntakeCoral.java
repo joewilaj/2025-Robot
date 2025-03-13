@@ -4,30 +4,26 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.IntakeConstants;
+
 
 /** An example command that uses an example subsystem. */
 
-public class RunElevator extends Command {
+public class IntakeCoral extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 
-  private final Elevator elevator;
-  private final double speed;
-  private final Arm arm;
+  private final Intake intake;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public RunElevator(Elevator elevator,Arm arm,double speed) {
-    this.elevator = elevator;
-    this.speed = speed;
-    this.arm = arm;
-
-    addRequirements(elevator);
+  public IntakeCoral(Intake intake,double speed) {
+    this.intake = intake;
+    addRequirements(intake);
   }
 
 
@@ -35,15 +31,13 @@ public class RunElevator extends Command {
 
   @Override
     public void execute() {
-      if(arm.isElevatorMovementSafe()){
-        elevator.setElevatorSpeed(speed);
-      }
+        intake.IntakeWithTimeout(IntakeConstants.CORAL_INTAKE_TIME); // Run the intake at 30% speed for 1 second
     }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    elevator.stopElevator();
+    intake.stopIntake();
   }
 
 

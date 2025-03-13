@@ -8,18 +8,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Arm;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RunArm extends Command {
-
+public class PositionArm extends Command {
   private final Arm arm;
-  private final double speed;
+  private final double angle;
   /** Creates a new RunArm. */
-  public RunArm(Arm arm, double speed) {
-
+  public PositionArm(Arm arm,double angle) {
+    // Use addRequirements() here to declare subsystem dependencies.
     this.arm = arm;
-    this.speed = speed;
-    addRequirements(arm);
-  
-
+    this.angle = angle;
   }
 
   // Called when the command is initially scheduled.
@@ -29,7 +25,7 @@ public class RunArm extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    arm.setArmSpeed(speed);
+    arm.setTargetAngle(angle);
   }
 
   // Called once the command ends or is interrupted.

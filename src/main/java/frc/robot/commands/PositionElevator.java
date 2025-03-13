@@ -5,16 +5,16 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Arm;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Arm;
 
 /** An example command that uses an example subsystem. */
 
-public class RunElevator extends Command {
+public class PositionElevator extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 
   private final Elevator elevator;
-  private final double speed;
+  private final double height;
   private final Arm arm;
 
   /**
@@ -22,13 +22,18 @@ public class RunElevator extends Command {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public RunElevator(Elevator elevator,Arm arm,double speed) {
+  public PositionElevator(Elevator elevator,Arm arm,double height) {
     this.elevator = elevator;
-    this.speed = speed;
+    this.height = height;
     this.arm = arm;
-
     addRequirements(elevator);
   }
+
+
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize() {}
+
 
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -36,7 +41,7 @@ public class RunElevator extends Command {
   @Override
     public void execute() {
       if(arm.isElevatorMovementSafe()){
-        elevator.setElevatorSpeed(speed);
+        elevator.setElevatorPosition(height);
       }
     }
 

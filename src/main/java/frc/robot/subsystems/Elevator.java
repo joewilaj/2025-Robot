@@ -3,17 +3,23 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import frc.robot.Constants.OperatorConstants;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkClosedLoopController;
-//import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase.ControlType;
 //import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.config.EncoderConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
 //import com.revrobotics.spark.ClosedLoopSlot;
 //import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
@@ -27,10 +33,17 @@ public class Elevator extends SubsystemBase {
   private SparkMax followerMotor;
   private final SparkMaxConfig leaderConfig;
   private final SparkMaxConfig followerConfig;
-  private final SparkMaxConfig globalConfig;
   private final SparkClosedLoopController pidController;
+
   
-  
+  private final ProfiledPIDController m_profiledController =
+    new ProfiledPIDController(
+    	OperatorConstants.kElevatorKp,
+		OperatorConstants.kElevatorKi,
+		OperatorConstants.kElevatorKd,
+		new TrapezoidProfile.Constraints(
+			OperatorConstants.kMaxLinearRateInchesPerS,
+			OperatorConstants.kMaxLinearAccelInchesPerSSquared));
   
   public Elevator(){
 
@@ -39,38 +52,80 @@ public class Elevator extends SubsystemBase {
 
     leaderConfig = new SparkMaxConfig();
     followerConfig = new SparkMaxConfig();
-    globalConfig = new SparkMaxConfig();
 
     pidController = leaderMotor.getClosedLoopController();
-  
-
-    globalConfig
-        .smartCurrentLimit(60)
-        .idleMode(IdleMode.kBrake)
-        .encoder.positionConversionFactor(OperatorConstants.inchesPerMotorRotation);
 
     leaderConfig
-        .apply(globalConfig)
-        .inverted(true);
+        .smartCurrentLimit(60)
+        .idleMode(IdleMode.kBrake)
+        .encoder.positionConversionFactor(OperatorConstants.inchesPerMotorRotation)
+        .velocityConversionFactor(OperatorConstants.inchesPerMotorRotation);
+
+
+    leaderConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .p(OperatorConstants.kElevatorKp)
+        .i(OperatorConstants.kElevatorKi)
+        .d(OperatorConstants.kElevatorKd)
+        .outputRange(-1, 1)
+        .p(0.0001, ClosedLoopSlot.kSlot1)
+        .i(0, ClosedLoopSlot.kSlot1)
+        .d(0, ClosedLoopSlot.kSlot1)
+        .velocityFF(1.0 / 5500, ClosedLoopSlot.kSlot1)
+        .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
     
   
     followerConfig
-        .apply(globalConfig)
-        .follow(leaderMotor);
+        .follow(leaderMotor,true);
 
     
     
     leaderMotor.configure(leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     followerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    
-    
-    
-   
+
+
+
   }
 
- 
+ public double getHeightInches() {
+	return leaderMotor.getEncoder().getPosition();
+  }
 
 
+  public void setElevatorSpeed(double speed){
+    // Get current position to check if we're at limits
+    double currentPosition = getHeightInches();
+    
+    // Prevent motion beyond limits
+    if ((currentPosition >= OperatorConstants.MAX_HEIGHT && speed > 0) || 
+        (currentPosition <= OperatorConstants.MIN_HEIGHT && speed < 0)) {
+      // Stop at limits
+      pidController.setReference(0, SparkMax.ControlType.kVelocity);
+    } else {
+      // Otherwise apply requested velocity
+      pidController.setReference(OperatorConstants.maxVelolicityRPM*speed, SparkMax.ControlType.kVelocity);
+    };
+  }
+
+  public void stopElevator(){
+    leaderMotor.set(0);
+  }
+
+
+  public void setElevatorPosition(double position){
+    double safeposition = MathUtil.clamp(position, OperatorConstants.MIN_HEIGHT, OperatorConstants.MAX_HEIGHT);
+    pidController.setReference(safeposition,ControlType.kPosition);
+  }
+
+  //function to reset the elevator position
+  public void resetElevatorPosition() {
+	leaderMotor.getEncoder().setPosition(0);
+  }
+
+  public boolean isAtHeight(double targetHeight, double tolerance) {
+	double currentHeight = getHeightInches();
+	return Math.abs(currentHeight - targetHeight) <= tolerance;
+  }
 
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
@@ -87,8 +142,4 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-  }
 }
