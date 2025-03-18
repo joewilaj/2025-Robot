@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
 
@@ -18,8 +19,10 @@ public class Arm extends SubsystemBase {
   // Initialize the arm motor controller
   private final TalonFX armMotor = new TalonFX(ArmConstants.ARM_MOTOR_ID);
   private TalonFXConfiguration armTalonFXConfig = new TalonFXConfiguration();
+  private final DutyCycleEncoder armEncoder = new DutyCycleEncoder(ArmConstants.ARM_ENCODER_PORT);
 
   private final MotionMagicExpoTorqueCurrentFOC armMotionMagicRequest;
+  private double offsetDegrees;
 
 
 
@@ -38,7 +41,7 @@ public class Arm extends SubsystemBase {
     
   }
 
-  
+  //Set the target angle of the arm using motion magic
   public void setTargetAngle(double AngleDegrees) {
 
     // Clamp the Angle to the allowed range
@@ -56,6 +59,8 @@ public class Arm extends SubsystemBase {
   }
   
 
+
+
   @Override
   public void periodic() {
     // armMotionMagicRequest.withPosition(targetAngle);
@@ -71,13 +76,41 @@ public class Arm extends SubsystemBase {
     armMotor.set(0);
   }
 
+  //Get the current angle of the arm using the TaloxFX built in encoder (Option 1)
+
   public double getArmAngle() {
     // Replace with actual logic to get the arm angle
     return armMotor.getPosition().getValueAsDouble() * ArmConstants.ARM_GEAR_RATIO; // Convert to degrees
   }
 
+
+
+  //Get the current angle of the arm using the DutyCycleEncoder (Option 2)
+  public double getRawAngle(){
+    return 360*armEncoder.get();
+
+  }
+  public void setZeroOffset(double offset) {
+     offsetDegrees = offset;
+  }
+
+
+  public double getAngle() {
+    double rawAngle = getRawAngle();
+    double calibratedAngle = rawAngle-offsetDegrees;
+    
+    // Normalize to 0-360 range
+    calibratedAngle = calibratedAngle % 360.0;
+    if (calibratedAngle < 0) {
+        calibratedAngle += 360.0;
+    }
+    
+    return calibratedAngle;
+}
+
+
   public boolean isElevatorMovementSafe() {
-    if (this.getArmAngle() < 85) { // Replace with actual angle check
+    if (this.getArmAngle() < 85) { // checking angle using built in encoder (can also use option 2 here)
         return true;
     } else {
         return false;

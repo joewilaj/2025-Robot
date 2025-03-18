@@ -6,9 +6,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -17,12 +15,9 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkBase.ControlType;
-//import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
-//import com.revrobotics.spark.ClosedLoopSlot;
-//import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 
@@ -36,14 +31,7 @@ public class Elevator extends SubsystemBase {
   private final SparkClosedLoopController pidController;
 
   
-  private final ProfiledPIDController m_profiledController =
-    new ProfiledPIDController(
-    	OperatorConstants.kElevatorKp,
-		OperatorConstants.kElevatorKi,
-		OperatorConstants.kElevatorKd,
-		new TrapezoidProfile.Constraints(
-			OperatorConstants.kMaxLinearRateInchesPerS,
-			OperatorConstants.kMaxLinearAccelInchesPerSSquared));
+
   
   public Elevator(){
 
@@ -81,7 +69,7 @@ public class Elevator extends SubsystemBase {
     
     
     leaderMotor.configure(leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    followerMotor.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    followerMotor.configure(followerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
 
 
@@ -117,7 +105,7 @@ public class Elevator extends SubsystemBase {
     pidController.setReference(safeposition,ControlType.kPosition);
   }
 
-  //function to reset the elevator position
+  
   public void resetElevatorPosition() {
 	leaderMotor.getEncoder().setPosition(0);
   }
@@ -139,7 +127,16 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
+
     // This method will be called once per scheduler run
+
+    
+
+  
+  
+
   }
+  
+
 
 }

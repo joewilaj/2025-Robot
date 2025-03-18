@@ -35,6 +35,7 @@ public final class Constants {
     public static final double ARM_MAX_ANGLE = 165.0; // Maximum angle in degrees
     public static final double ARM_MIN_ANGLE = 0.0; // Minimum angle in degrees
     public static final double ARM_SPEED = 1.0; // Speed of the arm movement
+    public static final int ARM_ENCODER_PORT = 0;
   }
 
   public static class IntakeConstants {

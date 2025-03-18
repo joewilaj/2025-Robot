@@ -102,7 +102,7 @@ public class Intake extends SubsystemBase {
     hasCoral = DetectCoral();
   }
 
-  //method to run the intake at low coral intake speed for set amount of time
+  //method to run the intake at low intake speed for set amount of time
   public void IntakeWithTimeout(double timeout){
     if (!hasCoral) {
       RunIntake(IntakeConstants.CORAL_INTAKE_SPEED);
