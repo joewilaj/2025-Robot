@@ -4,19 +4,17 @@
 
 package frc.robot.subsystems;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import frc.robot.Constants.OperatorConstants;
 import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.ControlType;
+//import com.revrobotics.spark.SparkClosedLoopController;
+//import com.revrobotics.spark.ClosedLoopSlot;
+//import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+//import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -28,7 +26,7 @@ public class Elevator extends SubsystemBase {
   private SparkMax followerMotor;
   private final SparkMaxConfig leaderConfig;
   private final SparkMaxConfig followerConfig;
-  private final SparkClosedLoopController pidController;
+  //private final SparkClosedLoopController pidController;
 
   
 
@@ -41,7 +39,7 @@ public class Elevator extends SubsystemBase {
     leaderConfig = new SparkMaxConfig();
     followerConfig = new SparkMaxConfig();
 
-    pidController = leaderMotor.getClosedLoopController();
+    //pidController = leaderMotor.getClosedLoopController();
 
     leaderConfig
         .smartCurrentLimit(60)
@@ -49,7 +47,7 @@ public class Elevator extends SubsystemBase {
         .encoder.positionConversionFactor(OperatorConstants.inchesPerMotorRotation)
         .velocityConversionFactor(OperatorConstants.inchesPerMotorRotation);
 
-
+/* 
     leaderConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .p(OperatorConstants.kElevatorKp)
@@ -61,6 +59,8 @@ public class Elevator extends SubsystemBase {
         .d(0, ClosedLoopSlot.kSlot1)
         .velocityFF(1.0 / 5500, ClosedLoopSlot.kSlot1)
         .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
+    */
+
     
   
     followerConfig
@@ -74,13 +74,13 @@ public class Elevator extends SubsystemBase {
 
 
   }
-
+ 
  public double getHeightInches() {
 	return leaderMotor.getEncoder().getPosition();
   }
 
-
-  public void setElevatorSpeed(double speed){
+/* 
+  public void setElevatorSpeedPID(double speed){
     // Get current position to check if we're at limits
     double currentPosition = getHeightInches();
     
@@ -94,46 +94,52 @@ public class Elevator extends SubsystemBase {
       pidController.setReference(OperatorConstants.maxVelolicityRPM*speed, SparkMax.ControlType.kVelocity);
     };
   }
+ */
+  public void setElevatorSpeed(double speed){
+
+    double safespeed = MathUtil.clamp(speed, -1, 1);
+    leaderMotor.set(safespeed);
+  }
 
   public void stopElevator(){
     leaderMotor.set(0);
   }
 
-
+ /* 
   public void setElevatorPosition(double position){
     double safeposition = MathUtil.clamp(position, OperatorConstants.MIN_HEIGHT, OperatorConstants.MAX_HEIGHT);
     pidController.setReference(safeposition,ControlType.kPosition);
   }
-
+*/
   
   public void resetElevatorPosition() {
 	leaderMotor.getEncoder().setPosition(0);
   }
-
+/* 
   public boolean isAtHeight(double targetHeight, double tolerance) {
 	double currentHeight = getHeightInches();
 	return Math.abs(currentHeight - targetHeight) <= tolerance;
   }
-
+*/
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+
+
+  public void updateDashboard() {
+    SmartDashboard.putNumber("Elevator Height", getHeightInches());
+    SmartDashboard.putNumber("Elevator Speed", leaderMotor.get());
+
   }
 
   @Override
   public void periodic() {
 
     // This method will be called once per scheduler run
-
+    updateDashboard();
     
-
-  
-  
 
   }
   

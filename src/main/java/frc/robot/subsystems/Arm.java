@@ -4,36 +4,37 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
+//import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
+import edu.wpi.first.math.controller.PIDController;
+
 
 
 public class Arm extends SubsystemBase {
   /** Creates a new RotatingArm. */
   // Initialize the arm motor controller
   private final TalonFX armMotor = new TalonFX(ArmConstants.ARM_MOTOR_ID);
-  private TalonFXConfiguration armTalonFXConfig = new TalonFXConfiguration();
-  private final DutyCycleEncoder armEncoder = new DutyCycleEncoder(ArmConstants.ARM_ENCODER_PORT);
-
-  private final MotionMagicExpoTorqueCurrentFOC armMotionMagicRequest;
-  private double offsetDegrees;
-
+  private TalonFXConfiguration armTalonFXConfig = new TalonFXConfiguration()
+    .withMotionMagic(new MotionMagicConfigs()
+      .withMotionMagicCruiseVelocity(1)
+      .withMotionMagicAcceleration(1));
+  private final DutyCycleEncoder armEncoder = new DutyCycleEncoder(ArmConstants.ARM_ENCODER_PORT,360,0);
+  private final PIDController pidController = new PIDController(ArmConstants.kp,ArmConstants.ki ,ArmConstants.kd);
 
 
   public Arm() {
     // Configure the arm motor to use motion magic control with FOC Postion
     armMotor.setNeutralMode(NeutralModeValue.Brake);
-
-    // Initialize MotionMagic FOC control request
-    armMotionMagicRequest = new MotionMagicExpoTorqueCurrentFOC(0);
-
     armMotor.getConfigurator().apply(armTalonFXConfig);
+    pidController.setTolerance(2.0);
+
 
     //code to set the amount of roatations based on the gear ratio
     
@@ -41,6 +42,7 @@ public class Arm extends SubsystemBase {
     
   }
 
+  /* 
   //Set the target angle of the arm using motion magic
   public void setTargetAngle(double AngleDegrees) {
 
@@ -53,21 +55,20 @@ public class Arm extends SubsystemBase {
     // Convert the angle from degrees to rotations
         double targetAngle_rotations = (SafeAngleDegrees/360)*ArmConstants.ARM_GEAR_RATIO;
 
-      
-
-      armMotionMagicRequest.withPosition(targetAngle_rotations);
+        armMotor.setControl(new MotionMagicDutyCycle(targetAngle_rotations));
   }
-  
 
+*/
 
 
   @Override
   public void periodic() {
-    // armMotionMagicRequest.withPosition(targetAngle);
+    SmartDashboard.putNumber("Current Arm Angle", getAngle());
+
   }
 
   public void setArmSpeed(double speed) {
-    // Replace with actual logic to set the arm speed
+
     armMotor.set(speed);
   }
 
@@ -76,44 +77,13 @@ public class Arm extends SubsystemBase {
     armMotor.set(0);
   }
 
-  //Get the current angle of the arm using the TaloxFX built in encoder (Option 1)
-
-  public double getArmAngle() {
-    // Replace with actual logic to get the arm angle
-    return armMotor.getPosition().getValueAsDouble() * ArmConstants.ARM_GEAR_RATIO; // Convert to degrees
-  }
-
-
 
   //Get the current angle of the arm using the DutyCycleEncoder (Option 2)
-  public double getRawAngle(){
-    return 360*armEncoder.get();
+  public double getAngle(){
+    return armEncoder.get();
 
   }
-  public void setZeroOffset(double offset) {
-     offsetDegrees = offset;
-  }
 
 
-  public double getAngle() {
-    double rawAngle = getRawAngle();
-    double calibratedAngle = rawAngle-offsetDegrees;
-    
-    // Normalize to 0-360 range
-    calibratedAngle = calibratedAngle % 360.0;
-    if (calibratedAngle < 0) {
-        calibratedAngle += 360.0;
-    }
-    
-    return calibratedAngle;
-}
 
-
-  public boolean isElevatorMovementSafe() {
-    if (this.getArmAngle() < 85) { // checking angle using built in encoder (can also use option 2 here)
-        return true;
-    } else {
-        return false;
-    }
-  }
 }

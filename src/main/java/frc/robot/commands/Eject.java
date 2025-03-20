@@ -6,7 +6,8 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants;
+
 
 /** An example command that uses an example subsystem. */
 
@@ -32,7 +33,7 @@ public class Eject extends Command {
 
   @Override
     public void execute() {
-        intake.RunIntake(speed);
+        intake.RunIntake(Constants.IntakeConstants.EJECT_SPEED);
     }
 
   // Called once the command ends or is interrupted.

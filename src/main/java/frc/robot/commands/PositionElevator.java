@@ -14,7 +14,7 @@ public class PositionElevator extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 
   private final Elevator elevator;
-  private final double height;
+  //private final double height;
   private final Arm arm;
 
   /**
@@ -24,7 +24,7 @@ public class PositionElevator extends Command {
    */
   public PositionElevator(Elevator elevator,Arm arm,double height) {
     this.elevator = elevator;
-    this.height = height;
+    //this.height = height;
     this.arm = arm;
     addRequirements(elevator);
   }
@@ -40,9 +40,7 @@ public class PositionElevator extends Command {
 
   @Override
     public void execute() {
-      if(arm.isElevatorMovementSafe()){
-        elevator.setElevatorPosition(height);
-      }
+        //elevator.setElevatorPosition(height);
     }
 
   // Called once the command ends or is interrupted.

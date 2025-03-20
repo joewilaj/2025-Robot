@@ -12,13 +12,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
 public class Intake extends SubsystemBase {
-  /** Creates a new RotatingArm. */
-  // Initialize the arm motor controller
+
+  //Initialize the intake motor
   private final TalonFX IntakeMotor = new TalonFX(IntakeConstants.INTAKE_MOTOR_ID);
   private final TalonFXConfiguration IntakeTalonFXConfig = new TalonFXConfiguration();
 
@@ -26,8 +26,8 @@ public class Intake extends SubsystemBase {
   private final CANrange intakeCANrange = new CANrange(IntakeConstants.CAN_RANGE_ID);
   
   
+  //variables for coral detection
   private boolean hasCoral = false;
-  private boolean isIntaking = false;
   private Timer intakeTimer = new Timer();
 
 
@@ -36,7 +36,7 @@ public class Intake extends SubsystemBase {
   public Intake() {
 
     IntakeMotor.setNeutralMode(NeutralModeValue.Brake);
-    //intakeMotor.setInverted(true);
+    IntakeMotor.setInverted(true);
     IntakeMotor.getConfigurator().apply(IntakeTalonFXConfig);
 
     
@@ -47,73 +47,44 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-
-    updateCoralDetection(); 
-  
-
-    //Check if the intake has coral
-   
-    if (isIntaking && hasCoral) {
-      stopIntake();
-      isIntaking = false;
-    }
-  }
-
-  public double getCANrangeDistance(){
-    return intakeCANrange.getDistance().getValueAsDouble()*0.0254; // distance to nearest object converted to inches from meters
+     SmartDashboard.putBoolean("CANrange Status", hasCoral);
   }
 
 
 
+
+  // Get the status signal of the CANRange sensor (True if object is within proximity range)
+  //Set proximity in meters in TunerX for the CANRange sensor (.05 meters)
 
   public boolean DetectCoral(){
-    double currentDistanceInches = intakeCANrange.getDistance().getValueAsDouble()*0.0254; 
-    boolean validReading = intakeCANrange.getFaultField().getValue() == 0;// distance to nearest object converted to inches from meters
-  
-    if(validReading && currentDistanceInches < IntakeConstants.INTAKE_THRESHOLD_DISTANCE){ 
-      return true; 
-    }
-    else{
-      return false; //If the nearest distance is greater than threshold, the CANRange is detecting the empty funnel
-    }
-
+    return intakeCANrange.getIsDetected().getValue();
   }
 
-  public boolean hasCoral() {
-    hasCoral = DetectCoral();
-    return hasCoral;
-  }
 
 
   public void RunIntake(double speed) {
-    // clamp the speed to the allowed range
-    speed = MathUtil.clamp(speed, -1, 1);
-    IntakeMotor.set(speed);
-    isIntaking = true;
-    intakeTimer.start();
+
+    hasCoral = DetectCoral();
+
+    if(hasCoral && intakeTimer.get() < IntakeConstants.CORAL_INTAKE_STOP_TIME){
+      intakeTimer.start();
+
+      speed = MathUtil.clamp(speed, -1, 1);
+      IntakeMotor.set(speed);
+      
+    }else if(hasCoral && intakeTimer.get() >= IntakeConstants.CORAL_INTAKE_STOP_TIME){ //Run the intake for a small amount of time after coral is detected
+      stopIntake();
+      intakeTimer.reset();
+
+    }else{ 
+      speed = MathUtil.clamp(speed, -1, 1);
+      IntakeMotor.set(speed);
+    }
+
   }
 
   public void stopIntake() {
     IntakeMotor.set(0);
   }
-
-  private void updateCoralDetection() {
-
-    hasCoral = DetectCoral();
-  }
-
-  //method to run the intake at low intake speed for set amount of time
-  public void IntakeWithTimeout(double timeout){
-    if (!hasCoral) {
-      RunIntake(IntakeConstants.CORAL_INTAKE_SPEED);
-      
-      if (intakeTimer.get() > timeout) {
-        stopIntake();
-      }
-    } else {
-      stopIntake();
-      }
-  }
-
 
 }

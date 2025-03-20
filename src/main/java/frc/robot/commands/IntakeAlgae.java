@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -13,16 +15,13 @@ public class IntakeAlgae extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 
   private final Intake intake;
-  private final double speed;
-
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public IntakeAlgae(Intake intake,double speed) {
+  public IntakeAlgae(Intake intake) {
     this.intake = intake;
-    this.speed = speed;
     addRequirements(intake);
   }
 
@@ -31,7 +30,8 @@ public class IntakeAlgae extends Command {
 
   @Override
     public void execute() {
-        intake.RunIntake(-speed);
+        double speed = RobotContainer.xbox.getLeftTriggerAxis();
+        intake.RunIntake(speed*Constants.IntakeConstants.ALGAE_INTAKE_SPEED);
     }
 
   // Called once the command ends or is interrupted.

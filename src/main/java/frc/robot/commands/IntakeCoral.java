@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.IntakeConstants;
 
 
@@ -21,7 +22,7 @@ public class IntakeCoral extends Command {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public IntakeCoral(Intake intake,double speed) {
+  public IntakeCoral(Intake intake) {
     this.intake = intake;
     addRequirements(intake);
   }
@@ -31,7 +32,8 @@ public class IntakeCoral extends Command {
 
   @Override
     public void execute() {
-        intake.IntakeWithTimeout(IntakeConstants.CORAL_INTAKE_TIME); // Run the intake at 30% speed for 1 second
+      double speed = RobotContainer.xbox.getRightTriggerAxis();
+        intake.RunIntake(IntakeConstants.CORAL_INTAKE_SPEED*speed); // Run the intake according to left trigger speed for 1 second
     }
 
   // Called once the command ends or is interrupted.
